@@ -24,12 +24,6 @@ A Jellyfin plugin that detects outro segments and gives you two options:
 
 ---
 
-## Project Structure
-outroskipperplus/
-├── server/   # C# Jellyfin plugin (API + configuration)
-└── client/   # TypeScript web client (overlay UI + player hook)
----
-
 ## Development Setup
 
 ### Server (C# / Rider)
