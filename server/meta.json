@@ -1,0 +1,13 @@
+{
+    "category": "General",
+    "changelog": "Initial release.",
+    "description": "Skips outros and previews the next episode.",
+    "guid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "imageUrl": "",
+    "name": "Outro Skipper Plus",
+    "overview": "Detects outro segments and shows a skip button and next episode preview.",
+    "owner": "sharv",
+    "targetAbi": "10.11.0.0",
+    "timestamp": "2026-01-01T00:00:00Z",
+    "version": "0.1.0.0"
+}
