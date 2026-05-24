@@ -53,4 +53,4 @@ A Jellyfin plugin that detects outro segments and gives you two options:
 
 ## License
 
-GPL-2.0 — matching Jellyfin's own license.
+GPL-2.0 — matching Jellyfin. 
