@@ -1,7 +1,9 @@
-﻿using Jellyfin.Plugin.OutroSkipperPlus.Configuration;
+﻿using Jellyfin.outroskipperplus;
+using Jellyfin.Plugin.OutroSkipperPlus.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.OutroSkipperPlus;
 
@@ -18,4 +20,16 @@ public class Plugin : BasePlugin<PluginConfiguration>
     }
 
     public static Plugin? Instance { get; private set; }
+    
+    public Plugin(
+        IApplicationPaths applicationPaths,
+        IXmlSerializer xmlSerializer,
+        ILogger<Plugin> logger)
+        : base(applicationPaths, xmlSerializer)
+    {
+        Instance = this;
+        var injector = new ScriptInjector(applicationPaths, logger);
+        injector.InjectScript();
+    }
+    
 }

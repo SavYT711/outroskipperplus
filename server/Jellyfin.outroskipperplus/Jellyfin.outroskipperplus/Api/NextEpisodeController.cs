@@ -1,8 +1,10 @@
-﻿using MediaBrowser.Controller.Chapters;
-using MediaBrowser.Controller.Dto;
+﻿using Jellyfin.Data.Enums;
+using Jellyfin.Database.Implementations.Enums;
+using MediaBrowser.Controller.Chapters;
+using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Controller.TV;
+using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Querying;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,19 +16,13 @@ public class NextEpisodeController : ControllerBase
 {
     private readonly ILibraryManager _libraryManager;
     private readonly IChapterManager _chapterManager;
-    private readonly ITVSeriesManager _tvSeriesManager;
-    private readonly IUserManager _userManager;
 
     public NextEpisodeController(
         ILibraryManager libraryManager,
-        IChapterManager chapterManager,
-        ITVSeriesManager tvSeriesManager,
-        IUserManager userManager)
+        IChapterManager chapterManager)
     {
         _libraryManager = libraryManager;
         _chapterManager = chapterManager;
-        _tvSeriesManager = tvSeriesManager;
-        _userManager = userManager;
     }
 
     [HttpGet("NextEpisodeInfo")]
@@ -41,18 +37,22 @@ public class NextEpisodeController : ControllerBase
             c.Name != null &&
             c.Name.Contains("outro", StringComparison.OrdinalIgnoreCase));
 
-        var user = _userManager.GetUserById(userId);
-        if (user == null)
-            return NotFound("User not found.");
+        var season = _libraryManager.GetItemById(currentEpisode.ParentId);
+        if (season == null)
+            return NotFound("Season not found.");
 
-        var nextUpResult = _tvSeriesManager.GetNextUp(new NextUpQuery
+        var episodes = _libraryManager.GetItemList(new InternalItemsQuery
         {
-            SeriesId = currentEpisode.SeriesId,
-            StartIndex = currentEpisode.IndexNumber,
-            User = user
-        }, new DtoOptions());
+            ParentId = season.Id,
+            IncludeItemTypes = new[] { BaseItemKind.Episode },
+            OrderBy = new[] { (ItemSortBy.IndexNumber, SortOrder.Ascending) }
+        }).ToList();
 
-        var nextEpisode = nextUpResult.Items.FirstOrDefault() as Episode;
+        var currentIndex = episodes.FindIndex(e => e.Id == currentEpisode.Id);
+        if (currentIndex < 0 || currentIndex >= episodes.Count - 1)
+            return NotFound("No next episode found.");
+
+        var nextEpisode = episodes[currentIndex + 1] as Episode;
         if (nextEpisode == null)
             return NotFound("No next episode found.");
 
@@ -63,5 +63,21 @@ public class NextEpisodeController : ControllerBase
             NextEpisodeName = nextEpisode.Name,
             NextEpisodeIndex = nextEpisode.IndexNumber
         });
+    }
+
+    [HttpGet("/OutroSkipperPlus/ClientScript")]
+    public IActionResult GetClientScript()
+    {
+        var scriptPath = Path.Combine(
+            Path.GetDirectoryName(GetType().Assembly.Location)!,
+            "web",
+            "outroskipperplus.js"
+        );
+
+        if (!System.IO.File.Exists(scriptPath))
+            return NotFound("Client script not found.");
+
+        var script = System.IO.File.ReadAllText(scriptPath);
+        return Content(script, "application/javascript");
     }
 }
