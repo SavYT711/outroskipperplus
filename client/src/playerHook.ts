@@ -5,8 +5,20 @@ const TICKS_PER_SECOND = 10_000_000;
 
 let overlayShown = false;
 let currentItemId: string | null = null;
-let currentUserId: string | null = null;
 let cachedInfo: NextEpisodeInfo | null = null;
+
+// Intercept fetch to grab the item ID from PlaybackInfo requests
+// Intercept XHR to grab the item ID from PlaybackInfo requests
+(window as any)._ospItemId = null;
+
+const originalOpen = XMLHttpRequest.prototype.open;
+XMLHttpRequest.prototype.open = function(method: string, url: string) {
+    const match = url.toString().match(/\/Items\/([a-f0-9]{32})\/PlaybackInfo/i);
+    if (match) {
+        (window as any)._ospItemId = match[1];
+    }
+    return originalOpen.apply(this, arguments as any);
+};
 
 function ticksToSeconds(ticks: number): number {
     return ticks / TICKS_PER_SECOND;
@@ -20,11 +32,11 @@ function getCurrentJellyfinContext(): { itemId: string; userId: string } | null 
     const apiClient = (window as any).ApiClient;
     if (!apiClient) return null;
 
-    const itemId = apiClient.getCurrentItemId?.();
     const userId = apiClient.getCurrentUserId?.();
-    if (!itemId || !userId) return null;
+    if (!userId || !(window as any)._ospItemId) return null;
 
-    return { itemId, userId };
+    return { itemId: (window as any)._ospItemId, userId };
+
 }
 
 async function onTimeUpdate() {
@@ -39,7 +51,6 @@ async function onTimeUpdate() {
     // Reset state if episode changed
     if (itemId !== currentItemId) {
         currentItemId = itemId;
-        currentUserId = userId;
         cachedInfo = null;
         overlayShown = false;
         removeOverlay();
@@ -99,7 +110,6 @@ export function initPlayerHook() {
     if (video) {
         video.addEventListener("timeupdate", onTimeUpdate);
     } else {
-        // Retry until the video element exists
         const observer = new MutationObserver(() => {
             const v = getVideoElement();
             if (v) {
