@@ -33,10 +33,15 @@ function createOverlay(info: NextEpisodeInfo): HTMLDivElement {
     `;
 
     overlay.innerHTML = `
-    <div style="font-size:14px;">Up next: <strong>${info.NextEpisodeName}</strong></div>
-    <button id="osp-skip-btn" ...>Skip Outro →</button>
-    <button id="osp-preview-btn" ...>▶ Preview Next Episode</button>
-`;
+        <div style="font-size:12px;color:#aaa;">Up next</div>
+        <div style="font-size:15px;font-weight:bold;">${info.NextEpisodeName}</div>
+        <button id="osp-watch-btn" style="padding:8px;cursor:pointer;background:#00a4dc;border:none;color:white;border-radius:4px;font-size:14px;">
+            ▶ Watch Now
+        </button>
+        <button id="osp-dismiss-btn" style="padding:6px;cursor:pointer;background:transparent;border:1px solid #666;color:#aaa;border-radius:4px;font-size:12px;">
+            Dismiss
+        </button>
+    `;
 
     return overlay;
 }

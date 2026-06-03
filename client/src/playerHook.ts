@@ -80,19 +80,29 @@ async function onTimeUpdate() {
 
     // Show overlay when outro starts
     if (!overlayShown && currentTime >= outroStartSeconds) {
-        overlayShown = true;
-        const overlay = createOverlay(cachedInfo);
-        document.body.appendChild(overlay);
+    overlayShown = true;
+    const overlay = createOverlay(cachedInfo);
+    document.body.appendChild(overlay);
 
-        document.getElementById("osp-skip-btn")?.addEventListener("click", () => {
-            video.currentTime = video.duration;
-            removeOverlay();
-        });
+    // Silently buffer the next episode in the background
+    startPreview(cachedInfo!.NextEpisodeId);
 
-        document.getElementById("osp-preview-btn")?.addEventListener("click", () => {
-            startPreview(cachedInfo!.NextEpisodeId);
-        });
-    }
+    document.getElementById("osp-watch-btn")?.addEventListener("click", () => {
+        const preview = document.getElementById("osp-preview-player") as HTMLVideoElement;
+        if (preview) {
+            preview.remove();
+        }
+        // Navigate to next episode
+        const apiClient = (window as any).ApiClient;
+        apiClient.navigateTo?.(`/details?id=${cachedInfo!.NextEpisodeId}`);
+        removeOverlay();
+    });
+
+    document.getElementById("osp-dismiss-btn")?.addEventListener("click", () => {
+        removeOverlay();
+        overlayShown = false;
+    });
+}
 }
 
 function startPreview(nextEpisodeId: string) {
@@ -110,9 +120,10 @@ function startPreview(nextEpisodeId: string) {
     previewPlayer.autoplay = true;
     previewPlayer.style.cssText = `
         position: fixed;
-        bottom: 220px;
+        bottom: 280px;
         right: 30px;
-        width: 320px;
+        width: 600px;
+        aspect-ratio: 16/9;
         border-radius: 8px;
         z-index: 9998;
         box-shadow: 0 4px 12px rgba(0,0,0,0.6);
