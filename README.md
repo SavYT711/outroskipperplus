@@ -55,7 +55,7 @@ A Jellyfin plugin that detects outro segments and gives you two options:
 - [x] Overlay dismisses on seek/pause
 - [x] Last episode guard
 - [ ] "Last episode" screen with random unwatched show/movie suggestion (Netflix-style)
-- [ ] Option B — PiP swap mode (settings toggle)
+- [ ] Option 2 — PiP swap mode (settings toggle)
 - [ ] Real outro detection via chapter markers
 - [ ] Countdown timer before auto-advancing
 - [ ] Mobile/TV client support
