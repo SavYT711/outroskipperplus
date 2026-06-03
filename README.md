@@ -1,15 +1,17 @@
 # Jellyfin Outro Skipper Plus
 
 A Jellyfin plugin that detects outro segments and gives you two options:
-- **Skip the outro** instantly
 - **Preview the next episode** in a mini-player while the outro plays
+  - 2 Options with current player as full screen or mini player
+- **Suggests next** unwatched movie or TV show
+  
 
 ---
 
 ## Features
 
 - Detects outros using chapter/marker data
-- Skip Outro button appears automatically when the outro begins
+- Watch next button appears automatically when the outro begins
 - Mini-player preview of the next episode in the corner of the screen
 - Countdown timer with optional auto-advance
 - Suppressed automatically on the last episode of a series
