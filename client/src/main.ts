@@ -1,9 +1,9 @@
-import { initPlayerHook } from "./playerHook";
+import { initPlayerHook, loadPluginConfig } from "./playerHook";
 
-// Wait for Jellyfin to finish loading before initialising
-function waitForJellyfin() {
+async function waitForJellyfin() {
     const apiClient = (window as any).ApiClient;
     if (apiClient) {
+        await loadPluginConfig();
         initPlayerHook();
     } else {
         setTimeout(waitForJellyfin, 500);

@@ -6,6 +6,15 @@ const TICKS_PER_SECOND = 10_000_000;
 let overlayShown = false;
 let currentItemId: string | null = null;
 let cachedInfo: NextEpisodeInfo | null = null;
+let pluginConfig: any = null;
+
+export async function loadPluginConfig() {
+    const response = await fetch("/OutroSkipperPlus/Configuration");
+    if (response.ok) {
+        pluginConfig = await response.json();
+    }
+}
+
 
 // Intercept fetch to grab the item ID from PlaybackInfo requests
 // Intercept XHR to grab the item ID from PlaybackInfo requests
@@ -42,6 +51,7 @@ function getCurrentJellyfinContext(): { itemId: string; userId: string } | null 
 async function onTimeUpdate() {
     const video = getVideoElement();
     if (!video) return;
+    if (!pluginConfig?.isEnabled) return;
 
     // Attach pause/seek listeners once per video element
     if (!(video as any)._ospListeners) {
@@ -68,13 +78,18 @@ async function onTimeUpdate() {
         overlayShown = false;
         removeOverlay();
         cachedInfo = await fetchNextEpisodeInfo(itemId, userId);
+        if (!cachedInfo) {
+            //Last episode or no next episode, the pop up doesn't show
+            return;
+        }
         (window as any)._ospCachedInfo = cachedInfo;
     }
 
     if (!cachedInfo) return;
 
     // Temporary: use 30 seconds as fallback for testing
-    const outroStartTicks = cachedInfo.OutroStartTicks ?? ((video.duration - 30) * 10_000_000);
+    const countdown = pluginConfig?.countdownSeconds ?? 30;
+    const outroStartTicks = cachedInfo.outroStartTicks ?? ((video.duration - countdown) * 10_000_000);
     const outroStartSeconds = ticksToSeconds(outroStartTicks);
     const currentTime = video.currentTime;
 
@@ -83,9 +98,13 @@ async function onTimeUpdate() {
     overlayShown = true;
     const overlay = createOverlay(cachedInfo);
     document.body.appendChild(overlay);
+    setTimeout(() => {
+        const el = document.getElementById("osp-overlay");
+        if (el) el.style.opacity = "1";
+    }, 50);
 
     // Silently buffer the next episode in the background
-    startPreview(cachedInfo!.NextEpisodeId);
+    startPreview(cachedInfo!.nextEpisodeId);
 
     document.getElementById("osp-watch-btn")?.addEventListener("click", () => {
         const preview = document.getElementById("osp-preview-player") as HTMLVideoElement;
@@ -94,7 +113,7 @@ async function onTimeUpdate() {
         }
         // Navigate to next episode
         const apiClient = (window as any).ApiClient;
-        apiClient.navigateTo?.(`/details?id=${cachedInfo!.NextEpisodeId}`);
+        apiClient.navigateTo?.(`/details?id=${cachedInfo!.nextEpisodeId}`);
         removeOverlay();
     });
 
@@ -127,9 +146,15 @@ function startPreview(nextEpisodeId: string) {
         border-radius: 8px;
         z-index: 9998;
         box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
     `;
 
     document.body.appendChild(previewPlayer);
+    setTimeout(() => {
+        const el = document.getElementById("osp-preview-player");
+        if (el) el.style.opacity = "1";
+    }, 50);
 }
 
 export function initPlayerHook() {

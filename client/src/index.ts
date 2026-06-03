@@ -1,10 +1,10 @@
 const PLUGIN_BASE_URL = "/OutroSkipperPlus";
 
 interface NextEpisodeInfo {
-    OutroStartTicks: number | null;
-    NextEpisodeId: string;
-    NextEpisodeName: string;
-    NextEpisodeIndex: number;
+    outroStartTicks: number | null;
+    nextEpisodeId: string;
+    nextEpisodeName: string;
+    nextEpisodeIndex: number;
 }
 
 async function fetchNextEpisodeInfo(itemId: string, userId: string): Promise<NextEpisodeInfo | null> {
@@ -30,11 +30,13 @@ function createOverlay(info: NextEpisodeInfo): HTMLDivElement {
         flex-direction: column;
         gap: 10px;
         min-width: 220px;
+        opacity: 0;
+        transition: opacity 1s ease-in-out;
     `;
 
     overlay.innerHTML = `
         <div style="font-size:12px;color:#aaa;">Up next</div>
-        <div style="font-size:15px;font-weight:bold;">${info.NextEpisodeName}</div>
+        <div style="font-size:15px;font-weight:bold;">${info.nextEpisodeName}</div>
         <button id="osp-watch-btn" style="padding:8px;cursor:pointer;background:#00a4dc;border:none;color:white;border-radius:4px;font-size:14px;">
             ▶ Watch Now
         </button>
