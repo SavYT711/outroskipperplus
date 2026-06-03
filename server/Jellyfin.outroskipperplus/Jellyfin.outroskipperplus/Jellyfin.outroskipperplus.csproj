@@ -11,4 +11,9 @@
       <PackageReference Include="Jellyfin.Model" Version="10.11.8" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Configuration\configurationpage.html" />
+      <EmbeddedResource Include="Configuration\configurationpage.html" />
+    </ItemGroup>
+
 </Project>

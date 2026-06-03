@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Outro Skipper Plus</title>
+</head>
+<body>
+<div id="OutroSkipperPlusConfigPage" data-role="page" class="page type-interior pluginConfigurationPage"
+     data-require="emby-input,emby-button,emby-select,emby-checkbox">
+    <div data-role="content">
+        <div class="content-primary">
+            <form id="OutroSkipperPlusConfigForm">
+
+                <div class="sectionTitleContainer">
+                    <h2 class="sectionTitle">Outro Skipper Plus</h2>
+                </div>
+
+                <!-- Enable Plugin -->
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label class="emby-checkbox-label">
+                        <input id="enablePlugin" type="checkbox" is="emby-checkbox" />
+                        <span>Enable Outro Skipper Plus</span>
+                    </label>
+                </div>
+
+                <!-- Auto Advance -->
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label class="emby-checkbox-label">
+                        <input id="autoAdvance" type="checkbox" is="emby-checkbox" />
+                        <span>Auto-advance to next episode</span>
+                    </label>
+                </div>
+
+                <!-- Countdown Seconds -->
+                <div class="inputContainer">
+                    <label class="inputLabel inputLabelUnfocused" for="countdownSeconds">
+                        Countdown seconds before auto-advance
+                    </label>
+                    <input id="countdownSeconds" type="number" is="emby-input" min="5" max="60" />
+                </div>
+
+                <!-- PiP Swap Mode -->
+                <div class="checkboxContainer checkboxContainer-withDescription">
+                    <label class="emby-checkbox-label">
+                        <input id="pipSwapMode" type="checkbox" is="emby-checkbox" />
+                        <span>PiP swap mode (shrink current episode, play next full screen)</span>
+                    </label>
+                </div>
+
+                <!-- Preview Size -->
+                <div class="selectContainer">
+                    <label class="selectLabel" for="previewSize">Preview player size</label>
+                    <select id="previewSize" is="emby-select">
+                        <option value="small">Small</option>
+                        <option value="medium">Medium</option>
+                        <option value="large">Large</option>
+                    </select>
+                </div>
+
+                <div>
+                    <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                        <span>Save</span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var OutroSkipperPlusConfig = {
+            pluginUniqueId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+
+            loadConfiguration: function (page) {
+                ApiClient.getPluginConfiguration(this.pluginUniqueId).then(function (config) {
+                    page.querySelector('#enablePlugin').checked = config.IsEnabled;
+                    page.querySelector('#autoAdvance').checked = config.AutoAdvance;
+                    page.querySelector('#countdownSeconds').value = config.CountdownSeconds;
+                    page.querySelector('#pipSwapMode').checked = config.PipSwapMode;
+                    page.querySelector('#previewSize').value = config.PreviewSize;
+                });
+            },
+
+            saveConfiguration: function (page) {
+                ApiClient.getPluginConfiguration(this.pluginUniqueId).then(function (config) {
+                    config.IsEnabled = page.querySelector('#enablePlugin').checked;
+                    config.AutoAdvance = page.querySelector('#autoAdvance').checked;
+                    config.CountdownSeconds = parseInt(page.querySelector('#countdownSeconds').value);
+                    config.PipSwapMode = page.querySelector('#pipSwapMode').checked;
+                    config.PreviewSize = page.querySelector('#previewSize').value;
+                    ApiClient.updatePluginConfiguration(OutroSkipperPlusConfig.pluginUniqueId, config);
+                });
+            }
+        };
+
+        document.getElementById('OutroSkipperPlusConfigForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            OutroSkipperPlusConfig.saveConfiguration(document.getElementById('OutroSkipperPlusConfigPage'));
+            Dashboard.processPluginConfigurationUpdateResult();
+        });
+
+        document.getElementById('OutroSkipperPlusConfigPage').addEventListener('pageshow', function () {
+            OutroSkipperPlusConfig.loadConfiguration(this);
+        });
+    </script>
+</div>
+</body>
+</html>

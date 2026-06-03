@@ -1,4 +1,5 @@
-﻿using Jellyfin.Data.Enums;
+﻿using Jellyfin.outroskipperplus;
+using Jellyfin.Data.Enums;
 using Jellyfin.Database.Implementations.Enums;
 using MediaBrowser.Controller.Chapters;
 using MediaBrowser.Controller.Entities;
@@ -58,10 +59,10 @@ public class NextEpisodeController : ControllerBase
 
         return Ok(new
         {
-            OutroStartTicks = outroChapter?.StartPositionTicks,
-            NextEpisodeId = nextEpisode.Id,
-            NextEpisodeName = nextEpisode.Name,
-            NextEpisodeIndex = nextEpisode.IndexNumber
+            outroStartTicks = outroChapter?.StartPositionTicks,
+            nextEpisodeId = nextEpisode.Id,
+            nextEpisodeName = nextEpisode.Name,
+            nextEpisodeIndex = nextEpisode.IndexNumber
         });
     }
 
@@ -79,5 +80,22 @@ public class NextEpisodeController : ControllerBase
 
         var script = System.IO.File.ReadAllText(scriptPath);
         return Content(script, "application/javascript");
+    }
+    
+    [HttpGet("Configuration")]
+    public ActionResult GetConfiguration()
+    {
+        var config = Plugin.Instance?.Configuration;
+        if (config == null)
+            return NotFound("Configuration not found.");
+
+        return Ok(new
+        {
+            isEnabled = config.IsEnabled,
+            countdownSeconds = config.CountdownSeconds,
+            autoAdvance = config.AutoAdvance,
+            pipSwapMode = config.PipSwapMode,
+            previewSize = config.PreviewSize
+        });
     }
 }
