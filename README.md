@@ -43,11 +43,22 @@ A Jellyfin plugin that detects outro segments and gives you two options:
 - [x] Plugin entry point and configuration
 - [x] Next episode API endpoint
 - [x] TypeScript client setup
-- [ ] Playback position hook
-- [ ] Overlay UI injection
-- [ ] Mini-player preview
-- [ ] Countdown timer + auto-advance
-- [ ] Last episode guard
+- [x] XHR interceptor for episode ID
+- [x] Overlay UI injection
+- [x] Skip Outro button
+- [x] Next episode name showing correctly
+- [x] Timing fixed (30s before end fallback)
+- [x] Silent background preview player
+- [x] Watch Now button
+- [x] Dismiss button
+- [x] Overlay dismisses on player close
+- [x] Overlay dismisses on seek/pause
+- [x] Last episode guard
+- [ ] "Last episode" screen with random unwatched show/movie suggestion (Netflix-style)
+- [ ] Option B — PiP swap mode (settings toggle)
+- [ ] Real outro detection via chapter markers
+- [ ] Countdown timer before auto-advancing
+- [ ] Mobile/TV client support
 
 ---
 
