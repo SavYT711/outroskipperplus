@@ -1,10 +1,10 @@
 const PLUGIN_BASE_URL = "/OutroSkipperPlus";
 
 interface NextEpisodeInfo {
-    outroStartTicks: number | null;
-    nextEpisodeId: string;
-    nextEpisodeName: string;
-    nextEpisodeIndex: number;
+    OutroStartTicks: number | null;
+    NextEpisodeId: string;
+    NextEpisodeName: string;
+    NextEpisodeIndex: number;
 }
 
 async function fetchNextEpisodeInfo(itemId: string, userId: string): Promise<NextEpisodeInfo | null> {
@@ -33,14 +33,10 @@ function createOverlay(info: NextEpisodeInfo): HTMLDivElement {
     `;
 
     overlay.innerHTML = `
-        <div style="font-size:14px;">Up next: <strong>${info.nextEpisodeName}</strong></div>
-        <button id="osp-skip-btn" style="padding:8px;cursor:pointer;background:#00a4dc;border:none;color:white;border-radius:4px;">
-            Skip Outro →
-        </button>
-        <button id="osp-preview-btn" style="padding:8px;cursor:pointer;background:#444;border:none;color:white;border-radius:4px;">
-            ▶ Preview Next Episode
-        </button>
-    `;
+    <div style="font-size:14px;">Up next: <strong>${info.NextEpisodeName}</strong></div>
+    <button id="osp-skip-btn" ...>Skip Outro →</button>
+    <button id="osp-preview-btn" ...>▶ Preview Next Episode</button>
+`;
 
     return overlay;
 }

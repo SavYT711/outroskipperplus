@@ -43,6 +43,19 @@ async function onTimeUpdate() {
     const video = getVideoElement();
     if (!video) return;
 
+    // Attach pause/seek listeners once per video element
+    if (!(video as any)._ospListeners) {
+        (video as any)._ospListeners = true;
+        video.addEventListener("pause", () => {
+            removeOverlay();
+            overlayShown = false;
+        });
+        video.addEventListener("seeking", () => {
+            removeOverlay();
+            overlayShown = false;
+        });
+    }
+
     const context = getCurrentJellyfinContext();
     if (!context) return;
 
@@ -55,11 +68,14 @@ async function onTimeUpdate() {
         overlayShown = false;
         removeOverlay();
         cachedInfo = await fetchNextEpisodeInfo(itemId, userId);
+        (window as any)._ospCachedInfo = cachedInfo;
     }
 
-    if (!cachedInfo || !cachedInfo.outroStartTicks) return;
+    if (!cachedInfo) return;
 
-    const outroStartSeconds = ticksToSeconds(cachedInfo.outroStartTicks);
+    // Temporary: use 30 seconds as fallback for testing
+    const outroStartTicks = cachedInfo.OutroStartTicks ?? ((video.duration - 30) * 10_000_000);
+    const outroStartSeconds = ticksToSeconds(outroStartTicks);
     const currentTime = video.currentTime;
 
     // Show overlay when outro starts
@@ -74,7 +90,7 @@ async function onTimeUpdate() {
         });
 
         document.getElementById("osp-preview-btn")?.addEventListener("click", () => {
-            startPreview(cachedInfo!.nextEpisodeId);
+            startPreview(cachedInfo!.NextEpisodeId);
         });
     }
 }
@@ -119,4 +135,14 @@ export function initPlayerHook() {
         });
         observer.observe(document.body, { childList: true, subtree: true });
     }
+
+    // Dismiss overlay when player is closed
+    window.addEventListener("hashchange", () => {
+        if (!window.location.hash.includes("video")) {
+            removeOverlay();
+            overlayShown = false;
+            currentItemId = null;
+            cachedInfo = null;
+        }
+    });
 }
