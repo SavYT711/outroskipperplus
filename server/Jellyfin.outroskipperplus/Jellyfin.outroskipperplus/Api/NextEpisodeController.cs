@@ -17,13 +17,16 @@ public class NextEpisodeController : ControllerBase
 {
     private readonly ILibraryManager _libraryManager;
     private readonly IChapterManager _chapterManager;
+    private readonly IUserManager _userManager;
 
     public NextEpisodeController(
         ILibraryManager libraryManager,
-        IChapterManager chapterManager)
+        IChapterManager chapterManager,
+        IUserManager userManager)
     {
         _libraryManager = libraryManager;
         _chapterManager = chapterManager;
+        _userManager = userManager;
     }
 
     [HttpGet("NextEpisodeInfo")]
@@ -96,6 +99,38 @@ public class NextEpisodeController : ControllerBase
             autoAdvance = config.AutoAdvance,
             pipSwapMode = config.PipSwapMode,
             previewSize = config.PreviewSize
+        });
+    }
+    
+    [HttpGet("RandomUnwatched")]
+    public ActionResult GetRandomUnwatched([FromQuery] Guid userId)
+    {
+        var user = _userManager.GetUserById(userId);
+        if (user == null)
+            return NotFound("User not found.");
+
+        var items = _libraryManager.GetItemList(new InternalItemsQuery
+        {
+            IncludeItemTypes = new[] { BaseItemKind.Series, BaseItemKind.Movie },
+            IsPlayed = false,
+            User = user,
+            Recursive = true,
+            Limit = 50
+        });
+
+        if (items.Count == 0)
+            return NotFound("No unwatched content found.");
+
+        var random = new Random();
+        var pick = items[random.Next(items.Count)];
+
+        return Ok(new
+        {
+            itemId = pick.Id,
+            itemName = pick.Name,
+            itemType = pick.GetType().Name,
+            backdropUrl = $"/Items/{pick.Id}/Images/Backdrop?fillWidth=1920&quality=90",
+            posterUrl = $"/Items/{pick.Id}/Images/Primary?fillWidth=400&quality=90"
         });
     }
 }
